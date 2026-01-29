@@ -1,10 +1,11 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-mongoose.connect('')
-
 const userSchema = new Schema({
-    email: String,
+    email: {
+        type:String,
+        unique: true
+    },
     password :String,
     firstName : String,
     LastName : String

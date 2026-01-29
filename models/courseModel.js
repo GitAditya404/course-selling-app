@@ -1,13 +1,15 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-mongoose.connect('')
-
-const userSchema = new Schema({
-    email: String,
-    password :String,
-    firstName : String,
-    LastName : String
+const courseSchema = new Schema({
+    title: String,
+    description: String,
+    price: Number,
+    imageUrl : String,
+    creatorId : {
+        type :Schema.Types.ObjectId,
+        ref: 'admin'
+    }
 })
 
-module.exports = mongoose.model('user',userSchema)
+module.exports = mongoose.model('course',courseSchema)

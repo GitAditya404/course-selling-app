@@ -8,7 +8,7 @@ const adminSchema = new Schema({
     },
     password :String,
     firstName : String,
-    LastName : String
+    lastName : String
 })
 
 module.exports = mongoose.model('admin',adminSchema)

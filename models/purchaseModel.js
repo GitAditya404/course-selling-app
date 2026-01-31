@@ -7,7 +7,7 @@ const purchaseScehma = new Schema({
         ref: 'user'
     },
     courseId :{
-        types: Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'course'
     } 
 })

@@ -1,7 +1,12 @@
 const express = require('express')
-
+const zod = require('zod')
 const userRouter = express.Router()
 // const {Router} = require('express')  // same as above
+const userModel = require('../models/userModel')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+const isLoggdInUser = require('../middlewares/isLoggedInUser')
+const purchaseModel = require('../models/purchaseModel')
 
 userRouter.post('/signup',async (req,res) => {
     const bodySchema = zod.object({
@@ -19,10 +24,8 @@ userRouter.post('/signup',async (req,res) => {
         
         const result = bodySchema.safeParse(req.body)
         if(!result.success) {
-            // return res.status(400).send("invalid Input")
             return res.json({
-                msg:    `${result.error.issues.msg} ${result.error.issues.error[0].path}  ${result.error.issues.error[0].message}`
-                // msg: result.error.issues
+                msg: `${result.error.issues[0].message}`
             })
         }
     
@@ -35,6 +38,9 @@ userRouter.post('/signup',async (req,res) => {
                 
                 let saltRounds = 5;
                         bcrypt.hash(password, saltRounds,async function(err, hash) {
+                            if (err) {  // try-catch will not caught bcrypt err b/c it uses a callback fn
+                                return res.status(500).json({ msg: "Error hashing password" });
+                            }
                             await userModel.create({
                                 email, 
                                 password: hash,
@@ -55,14 +61,12 @@ userRouter.post('/login',async (req,res) => {
     const bodySchema = zod.object({
             email : zod.string().email(),
             password : zod.string()
-             .min(5, "Password must be at least 5 characters")
-                .max(10, "Password must be maxm 10 characters")
         })
     
         const result = bodySchema.safeParse(req.body);
         if(!result.success){
             return res.status(400).json({
-                msg: `${result.error.issues.msg} ${result.error.issues.error[0].path}  ${result.error.issues.error[0].message}`
+                msg: `${result.error.issues[0].message}`
             })
         }
     
@@ -73,6 +77,11 @@ userRouter.post('/login',async (req,res) => {
                     return res.status(404).send("Account not found")
                 const hash = user.password;
                 bcrypt.compare(password, hash, function(err, result) {
+
+                    if (err) {
+                    return res.status(500).json({ msg: "Error hashing password" });
+                    }
+
                     if(!result)
                         return res.status(400).send("Password Incorrect")
                     else
@@ -89,7 +98,17 @@ userRouter.post('/login',async (req,res) => {
         }
 })
 
-userRouter.post('/purchases', (req,res) => {
+userRouter.get('/purchases',isLoggdInUser,async (req,res) => {
+    let userId = req.user._id
+    let courseId = req.body.courseId;
+
+    await purchaseModel.create({
+        userId, courseId
+    })
+    res.json({
+        msg: "you have successfuly purchase",
+        courseId : courseId
+    })
 
 })
 

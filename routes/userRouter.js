@@ -99,17 +99,15 @@ userRouter.post('/login',async (req,res) => {
 })
 
 userRouter.get('/purchases',isLoggdInUser,async (req,res) => {
-    let userId = req.user._id
-    let courseId = req.body.courseId;
-
-    await purchaseModel.create({
-        userId, courseId
+    let userId = req.user._id;
+    let courses = await purchaseModel.find({userId:userId}).populate('courseId')
+    let courseTitle = courses.map((ele) => {
+        return ele.courseId.title // .title works b/c already populated
     })
     res.json({
-        msg: "you have successfuly purchase",
-        courseId : courseId
+        msg: "All your purchase courses are",
+        courseTitle : courseTitle
     })
-
 })
 
 module.exports = userRouter
